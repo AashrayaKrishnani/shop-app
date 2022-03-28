@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/screens/my_products_screen.dart';
 import 'package:shop_app/screens/products_screen.dart';
 
 import '../screens/orders_screen.dart';
@@ -70,7 +71,14 @@ class MainDrawer extends StatelessWidget {
                 Icons.delivery_dining,
                 '❤ My Orders ❤',
                 () => Navigator.of(context)
-                    .pushReplacementNamed(OrdersScreen.route))
+                    .pushReplacementNamed(OrdersScreen.route)),
+            const Divider(),
+            buildListTile(
+                context,
+                Icons.edit,
+                '☀ My Products ☀',
+                () => Navigator.of(context)
+                    .pushReplacementNamed(MyProductsScreen.route))
           ],
         ),
       ),
