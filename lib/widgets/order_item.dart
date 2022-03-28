@@ -18,7 +18,7 @@ class _OrderItemState extends State<OrderItem> {
   bool _expanded = false;
 
   Widget get moreDetails {
-    return Container(
+    return SizedBox(
         height: min(widget.order.cartItemList.length * 50 + 20, 250),
         child: ListView.builder(
           itemBuilder: (ctx, i) => Card(

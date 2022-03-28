@@ -11,8 +11,47 @@ class CartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final Cart cart = Provider.of<Cart>(context, listen: false);
 
+    void confirmDismiss(BuildContext context, Cart cart) {
+      cart.removeItem(cartItemData);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(
+            seconds: 2,
+          ),
+          content: Text(
+            'Removed ${cartItemData.quantity}x\'${cartItemData.product.title}\' ☹',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+
     return Dismissible(
-      onDismissed: (direction) => cart.removeItem(cartItemData),
+      confirmDismiss: (_) => showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Really Want to Remove ${cartItemData.product.title}'),
+          content: Text(
+              'Remove ${cartItemData.quantity}x ${cartItemData.product.title} from the Cart?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                'Remove',
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+      ),
+      onDismissed: (direction) => confirmDismiss(context, cart),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
