@@ -87,8 +87,8 @@ class CartItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(5),
               child: SizedBox.square(
                 dimension: 80,
-                child: Image.asset(
-                  cartItemData.product.imgUrl,
+                child: Image(
+                  image: cartItemData.product.image.image,
                   fit: BoxFit.cover,
                 ),
               ),
