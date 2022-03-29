@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/screens/product_form_screen.dart';
 
 import '../models/product.dart';
+import '../models/products.dart';
 
 class MyProductItem extends StatelessWidget {
   final Product product;
@@ -15,7 +18,7 @@ class MyProductItem extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundImage: AssetImage(product.imgUrl),
+            backgroundImage: product.image.image,
           ),
           title: Text(product.title),
           subtitle: Text(product.description),
@@ -25,14 +28,86 @@ class MyProductItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushNamed(ProductFormScreen.route, arguments: product)
+                        .then((value) {
+                      bool result = value == null ? (false) : (value as bool);
+
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: const Duration(
+                            seconds: 2,
+                          ),
+                          content: Text(
+                            result
+                                ? 'Succesfully Edited Product.'
+                                : 'Cancelled Succesfully.',
+                          ),
+                          backgroundColor: result ? Colors.green : Colors.red,
+                        ),
+                      );
+                    });
+                  },
                   icon: Icon(
                     Icons.edit,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Really Want to Delete?'),
+                        content: ListTile(
+                          title: Text(product.title),
+                          subtitle: Text('\$${product.price}'),
+                          trailing: CircleAvatar(
+                            backgroundImage: product.image.image,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text(
+                              'Remove',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).then((confirmDelete) {
+                      confirmDelete ??= false;
+                      if (confirmDelete) {
+                        Provider.of<Products>(context, listen: false)
+                            .removeProduct(product);
+                      }
+
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: const Duration(
+                            seconds: 2,
+                          ),
+                          content: Text(
+                            confirmDelete
+                                ? 'Succesfully Deleted.'
+                                : 'Cancelled Succesfully.',
+                          ),
+                          backgroundColor:
+                              confirmDelete ? Colors.green : Colors.red,
+                        ),
+                      );
+                    });
+                  },
                   icon: Icon(
                     Icons.delete,
                     color: Theme.of(context).colorScheme.error,
