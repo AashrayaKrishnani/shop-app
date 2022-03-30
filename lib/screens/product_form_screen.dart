@@ -48,13 +48,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     if (isValid) {
       _form.currentState?.save();
       if (_type == ProductFormType.add) {
-        Provider.of<Products>(context, listen: false).addProduct(Product(
-            id: Object.hashAll([_title, _price, _image, _description])
-                .toString(),
+        Provider.of<Products>(context, listen: false).addProduct(
             description: _description,
             image: _image!,
             price: _price,
-            title: _title));
+            title: _title);
       } else {
         Provider.of<Products>(context, listen: false).updateProduct(Product(
             id: _product!.id,
