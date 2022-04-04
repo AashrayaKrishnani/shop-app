@@ -18,7 +18,7 @@ class MyProductItem extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundImage: product.image.image,
+            backgroundImage: NetworkImage(product.imageUrl),
           ),
           title: Text(product.title),
           subtitle: Text(product.description),
@@ -65,7 +65,7 @@ class MyProductItem extends StatelessWidget {
                           title: Text(product.title),
                           subtitle: Text('\$${product.price}'),
                           trailing: CircleAvatar(
-                            backgroundImage: product.image.image,
+                            backgroundImage: NetworkImage(product.imageUrl),
                           ),
                         ),
                         actions: [

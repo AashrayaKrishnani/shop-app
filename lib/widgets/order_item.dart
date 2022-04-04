@@ -30,8 +30,8 @@ class _OrderItemState extends State<OrderItem> {
                   borderRadius: BorderRadius.circular(5),
                   child: SizedBox.square(
                     dimension: 30,
-                    child: Image(
-                      image: widget.order.cartItemList[i].product.image.image,
+                    child: Image.network(
+                      widget.order.cartItemList[i].product.imageUrl,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -78,8 +78,8 @@ class _OrderItemState extends State<OrderItem> {
                   borderRadius: BorderRadius.circular(10),
                   child: SizedBox.square(
                     dimension: 80,
-                    child: Image(
-                      image: widget.order.cartItemList[0].product.image.image,
+                    child: Image.network(
+                      widget.order.cartItemList[0].product.imageUrl,
                       fit: BoxFit.cover,
                     ),
                   ),

@@ -41,8 +41,8 @@ class ProductScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: 300,
-                  child: Image(
-                    image: product.image.image,
+                  child: Image.network(
+                    product.imageUrl,
                     fit: BoxFit.contain,
                   ),
                 ),

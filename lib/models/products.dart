@@ -8,31 +8,10 @@ class Products with ChangeNotifier {
   List<Product> _products = [
     Product(
       id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      image: Image.asset('assets/images/Red Shirt.jpg'),
-    ),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      image: Image.asset('assets/images/Trousers.jpg'),
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      image: Image.asset('assets/images/Yellow Scarf.jpg'),
-    ),
-    Product(
-      id: 'p4',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      image: Image.asset('assets/images/A Pan.jpg'),
+      title: 'The Whole Earth',
+      description: 'A blue colored planet with lights, humans and some life.',
+      price: .99,
+      imageUrl: 'https://www.edx.org/images/brand/globe-dark-lg.png',
     ),
   ];
 
@@ -48,13 +27,13 @@ class Products with ChangeNotifier {
       {required String title,
       required String description,
       required double price,
-      required Image image}) {
+      required String imageUrl}) {
     _products.add(Product(
-        id: Object.hashAll([title, price, image, description]).toString(),
+        id: Object.hashAll([title, price, imageUrl, description]).toString(),
         title: title,
         description: description,
         price: price,
-        image: image));
+        imageUrl: imageUrl));
     notifyListeners();
   }
 

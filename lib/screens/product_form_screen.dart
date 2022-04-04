@@ -30,7 +30,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   String _title = '';
   String _description = '';
   double _price = 0;
-  Image? _image;
+  String _imageUrl = '';
 
   final _titleField = GlobalKey<FormFieldState>();
   final _priceField = GlobalKey<FormFieldState>();
@@ -50,14 +50,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (_type == ProductFormType.add) {
         Provider.of<Products>(context, listen: false).addProduct(
             description: _description,
-            image: _image!,
+            imageUrl: _imageUrl,
             price: _price,
             title: _title);
       } else {
         Provider.of<Products>(context, listen: false).updateProduct(Product(
             id: _product!.id,
             description: _description,
-            image: _image!,
+            imageUrl: _imageUrl,
             price: _price,
             title: _title));
       }
@@ -73,7 +73,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           borderRadius: BorderRadius.circular(15),
         ),
         width: 100,
-        child: Image(image: _image!.image, fit: BoxFit.cover),
+        child: Image.network(_imageUrl, fit: BoxFit.cover),
       ),
     );
   }
@@ -85,7 +85,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         _product = ModalRoute.of(context)?.settings.arguments as Product;
         _type = ProductFormType.edit;
       }
-      if (_type == ProductFormType.edit) _image = _product!.image;
+      if (_type == ProductFormType.edit) _imageUrl = _product!.imageUrl;
       init = false;
     }
     return Scaffold(
@@ -203,7 +203,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       Expanded(
                         child: TextFormField(
                           key: _imageField,
-                          initialValue: '',
+                          initialValue: _imageUrl,
                           maxLines: 3,
                           decoration:
                               const InputDecoration(labelText: 'Image Url'),
@@ -226,22 +226,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                 _imageField.currentState?.validate() ?? false;
                             if (isValid) {
                               setState(() {
-                                _image = Image.network(val);
+                                _imageUrl = val.toString();
                               });
                             } else {
                               setState(() {
-                                _image = null;
+                                _imageUrl = '';
                               });
                             }
                           },
                           onSaved: (val) => setState(
                             () {
-                              _image = val == null ? null : Image.network(val);
+                              _imageUrl = val == null ? '' : val.toString();
                             },
                           ),
                         ),
                       ),
-                      if (_image != null) _imagePreview,
+                      if (_imageUrl.trim().isNotEmpty) _imagePreview,
                     ],
                   ),
                 ),

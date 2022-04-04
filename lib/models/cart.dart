@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'product.dart';
+import 'products.dart';
 
 class CartItemData {
   final Product product;
@@ -68,5 +69,18 @@ class Cart with ChangeNotifier {
   void clear() {
     _items.clear();
     notifyListeners();
+  }
+
+  void update(Products productsData) {
+    bool didChange =
+        _items.any((ci) => !productsData.products.contains(ci.product));
+
+    if (didChange) {
+      _items = _items
+          .where((ci) => productsData.products.contains(ci.product))
+          .toList();
+
+      notifyListeners();
+    }
   }
 }
