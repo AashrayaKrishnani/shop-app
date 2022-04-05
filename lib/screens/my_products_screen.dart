@@ -38,6 +38,32 @@ class MyProductsScreen extends StatelessWidget {
                       backgroundColor: result ? Colors.green : Colors.red,
                     ),
                   );
+                }).catchError((error) {
+                  showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                            backgroundColor: Theme.of(ctx).errorColor,
+                            title: const Text(
+                              'Dev Messed Up! 😅',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            content: const Text(
+                              'You can be Nice and send us a ScreenShot of this (at loveaash3@gmail.com) so we can solve it out! 🙏',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              Colors.white)),
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                  child: const Text(
+                                    'Ahh Alright!',
+                                    style: TextStyle(color: Colors.red),
+                                  ))
+                            ],
+                          ));
                 });
               },
               icon: const Icon(Icons.add))

@@ -1,7 +1,10 @@
 // ignore_for_file: prefer_final_fields
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import 'firebase.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
@@ -23,13 +26,23 @@ class Products with ChangeNotifier {
     return [...(_products.where((p) => p.isFavorite)).toList()];
   }
 
-  void addProduct(
+  Future<void> addProduct(
       {required String title,
       required String description,
       required double price,
-      required String imageUrl}) {
+      required String imageUrl}) async {
+    final response = await Firebase.postData('products.json', {
+      'title': title,
+      'description': description,
+      'price': price,
+      'imageUrl': imageUrl,
+    });
+
+    String id =
+        (json.decode(response.body) as Map<dynamic, dynamic>)['name'] as String;
+
     _products.add(Product(
-        id: Object.hashAll([title, price, imageUrl, description]).toString(),
+        id: id,
         title: title,
         description: description,
         price: price,
@@ -42,8 +55,14 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
     if (_products.any((p) => p.id == product.id)) {
+      await Firebase.patchData('products/${product.id}.json', {
+        'title': product.title,
+        'description': product.description,
+        'price': product.price,
+        'imageUrl': product.imageUrl,
+      });
       _products.removeWhere((p) => p.id == product.id);
       _products.add(product);
       notifyListeners();
