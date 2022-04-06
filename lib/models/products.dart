@@ -8,15 +8,7 @@ import 'firebase.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
-  List<Product> _products = [
-    Product(
-      id: 'p1',
-      title: 'The Whole Earth',
-      description: 'A blue colored planet with lights, humans and some life.',
-      price: .99,
-      imageUrl: 'https://www.edx.org/images/brand/globe-dark-lg.png',
-    ),
-  ];
+  List<Product> _products = [];
 
   List<Product> get products {
     return [..._products];
@@ -36,6 +28,7 @@ class Products with ChangeNotifier {
       'description': description,
       'price': price,
       'imageUrl': imageUrl,
+      'isFavorite': false,
     });
 
     String id =
@@ -50,8 +43,13 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeProduct(Product product) {
-    _products.remove(product);
+  Future<void> removeProduct(Product product) async {
+    try {
+      await Firebase.deleteData('products/${product.id}.json');
+      _products.remove(product);
+    } catch (error) {
+      rethrow;
+    }
     notifyListeners();
   }
 
@@ -62,6 +60,7 @@ class Products with ChangeNotifier {
         'description': product.description,
         'price': product.price,
         'imageUrl': product.imageUrl,
+        'isFavorite': product.isFavorite,
       });
       _products.removeWhere((p) => p.id == product.id);
       _products.add(product);
@@ -69,8 +68,36 @@ class Products with ChangeNotifier {
     }
   }
 
-  void toggleFavorite(Product product) {
-    _products.firstWhere((p) => p.id == product.id).toggleFavorite();
-    notifyListeners();
+  Future<void> refresh() async {
+    var map;
+    try {
+      final response = await Firebase.getData('products.json');
+      map = json.decode(response.body) as Map<String, dynamic>;
+    } catch (error) {
+      _products = [];
+      notifyListeners();
+      rethrow;
+    }
+
+    List<Product> fromServer = [];
+
+    map.forEach((id, data) {
+      fromServer.add(
+        Product(
+          id: id,
+          title: data['title'],
+          description: data["description"],
+          price: data["price"],
+          imageUrl: data['imageUrl'],
+          isFavorite: data['isFavorite'],
+        ),
+      );
+    });
+
+    if (fromServer.any((p1) => !_products.any((p2) => p2.id == p1.id)) ||
+        _products.any((p1) => !fromServer.any((p2) => p2.id == p1.id))) {
+      _products = fromServer;
+      notifyListeners();
+    }
   }
 }

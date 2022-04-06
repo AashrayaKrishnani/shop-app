@@ -84,29 +84,48 @@ class MyProductItem extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ).then((confirmDelete) {
-                      confirmDelete ??= false;
-                      if (confirmDelete) {
-                        Provider.of<Products>(context, listen: false)
-                            .removeProduct(product);
-                      }
+                    ).then(
+                      (confirmDelete) async {
+                        confirmDelete ??= false;
 
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: const Duration(
-                            seconds: 2,
-                          ),
-                          content: Text(
-                            confirmDelete
-                                ? 'Succesfully Deleted.'
-                                : 'Cancelled Succesfully.',
-                          ),
-                          backgroundColor:
-                              confirmDelete ? Colors.green : Colors.red,
-                        ),
-                      );
-                    });
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                        if (confirmDelete) {
+                          await Provider.of<Products>(context, listen: false)
+                              .removeProduct(product)
+                              .then((_) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                duration: const Duration(
+                                  seconds: 2,
+                                ),
+                                content: Text(
+                                  confirmDelete
+                                      ? 'Succesfully Deleted.'
+                                      : 'Cancelled Succesfully.',
+                                ),
+                                backgroundColor:
+                                    confirmDelete ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }).catchError(
+                            (error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  duration: Duration(
+                                    seconds: 2,
+                                  ),
+                                  content: Text(
+                                    'Error: Unable to Delete. 🤯',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    );
                   },
                   icon: Icon(
                     Icons.delete,

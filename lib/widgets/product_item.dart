@@ -3,14 +3,30 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 
+import '../helpers.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 
 class ProductItem extends StatelessWidget {
   const ProductItem({Key? key}) : super(key: key);
 
-  void favoriteButtonPressed(Product product, BuildContext context) {
-    product.toggleFavorite();
+  void favoriteButtonPressed(Product product, BuildContext context) async {
+    try {
+      await product.toggleFavorite();
+    } catch (error) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(
+            seconds: product.isFavorite ? 1 : 2,
+          ),
+          content: const Text('Error Changing Status, Rolling Back Changes.'),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+      return;
+    }
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -55,8 +71,12 @@ class ProductItem extends StatelessWidget {
 
     return GridTile(
       child: GestureDetector(
-        onTap: () => Navigator.of(context)
-            .pushNamed(ProductScreen.route, arguments: product),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: ((context) => ChangeNotifierProvider.value(
+                value: product, child: const ProductScreen())),
+          ),
+        ),
         child: Image.network(
           product.imageUrl,
           fit: BoxFit.contain,
@@ -77,7 +97,7 @@ class ProductItem extends StatelessWidget {
                   style: const TextStyle(fontSize: 20),
                 ),
                 Text(
-                  '\$ ' + product.price.toString(),
+                  '\$ ' + formatAmt(product.price).toString(),
                   style: const TextStyle(fontSize: 13),
                   textAlign: TextAlign.center,
                 ),

@@ -104,8 +104,7 @@ class CartItem extends StatelessWidget {
                 style: const TextStyle(fontSize: 10),
               ),
             ),
-            trailing: SizedBox(
-              width: 80,
+            trailing: FittedBox(
               child:
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Chip(

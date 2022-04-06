@@ -14,7 +14,9 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Product product = ModalRoute.of(context)?.settings.arguments as Product;
+    Product product = Provider.of<Product>(context);
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +61,7 @@ class ProductScreen extends StatelessWidget {
                 Text(
                   product.description,
                   style: Theme.of(context).textTheme.bodyText1,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(
                   height: 10,
@@ -88,8 +91,46 @@ class ProductScreen extends StatelessWidget {
                           child: Consumer<Products>(
                             builder: (context, productData, child) =>
                                 IconButton(
-                              onPressed: () =>
-                                  productData.toggleFavorite(product),
+                              onPressed: () async {
+                                try {
+                                  await product.toggleFavorite();
+                                } catch (error) {
+                                  ScaffoldMessenger.of(context)
+                                      .clearMaterialBanners();
+                                  ScaffoldMessenger.of(context)
+                                      .showMaterialBanner(
+                                    MaterialBanner(
+                                      backgroundColor: Colors.red,
+                                      content: const Text(
+                                        'Error Changing Status, Rolling Back Changes.',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      actions: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(5)),
+                                          child: TextButton(
+                                            onPressed: () =>
+                                                ScaffoldMessenger.of(context)
+                                                    .clearMaterialBanners(),
+                                            child: const Text(
+                                              'Okie! 😼',
+                                              style:
+                                                  TextStyle(color: Colors.red),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                  await Future.delayed(
+                                          const Duration(seconds: 3))
+                                      .then((_) => ScaffoldMessenger.of(context)
+                                          .clearMaterialBanners());
+                                }
+                              },
                               icon: Icon(
                                 product.isFavorite
                                     ? Icons.favorite
