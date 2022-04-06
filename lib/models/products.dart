@@ -44,13 +44,20 @@ class Products with ChangeNotifier {
   }
 
   Future<void> removeProduct(Product product) async {
+    // Storing backup and removing local copy
+    int index = _products.indexOf(product);
+    Product backup = _products[index];
+    _products.remove(product);
+    notifyListeners();
+
     try {
       await Firebase.deleteData('products/${product.id}.json');
-      _products.remove(product);
     } catch (error) {
+      // Roll Back Changes
+      _products.insert(index, backup);
+      notifyListeners();
       rethrow;
     }
-    notifyListeners();
   }
 
   Future<void> updateProduct(Product product) async {

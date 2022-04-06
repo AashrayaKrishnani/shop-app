@@ -12,6 +12,25 @@ class ProductItem extends StatelessWidget {
 
   void favoriteButtonPressed(Product product, BuildContext context) async {
     try {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(
+            seconds: !product.isFavorite ? 1 : 2,
+          ),
+          content: Text(!product.isFavorite
+              ? 'Added to Favorites! ❤'
+              : 'Removed From Favorites. 😥'),
+          backgroundColor: !product.isFavorite
+              ? Theme.of(context).colorScheme.tertiary
+              : Colors.black87,
+          action: product.isFavorite
+              ? SnackBarAction(
+                  label: '❤ ADD IT BACK ❤',
+                  onPressed: () => favoriteButtonPressed(product, context))
+              : null,
+        ),
+      );
       await product.toggleFavorite();
     } catch (error) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -26,26 +45,6 @@ class ProductItem extends StatelessWidget {
       );
       return;
     }
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: Duration(
-          seconds: product.isFavorite ? 1 : 2,
-        ),
-        content: Text(product.isFavorite
-            ? 'Added to Favorites! ❤'
-            : 'Removed From Favorites. 😥'),
-        backgroundColor: product.isFavorite
-            ? Theme.of(context).colorScheme.tertiary
-            : Colors.black87,
-        action: !product.isFavorite
-            ? SnackBarAction(
-                label: '❤ ADD IT BACK ❤',
-                onPressed: () => favoriteButtonPressed(product, context))
-            : null,
-      ),
-    );
   }
 
   void cartButtonPressed(Cart cart, Product product, BuildContext context) {

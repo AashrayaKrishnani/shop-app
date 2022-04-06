@@ -25,6 +25,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
   List<Product> products = [];
   FilterOptions filterOption = FilterOptions.all;
   bool isLoading = false;
+  final errorDialog = const ErrorDialog(
+    title: 'Error Loading Products 😅',
+    content:
+        'Probably an Internet issue, or Maybe... there are No Products! (Hint: Add Some then! 🤭)',
+    buttonMessage: 'Alrighty bud! 😼',
+  );
 
   @override
   void initState() {
@@ -39,12 +45,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         isLoading = false;
       });
     }).catchError((error) {
-      showDialog(
-          context: context,
-          builder: (ctx) => const ErrorDialog(
-                title: 'Error Loading Products 😅',
-                buttonMessage: 'Alrighty bud! 😼',
-              ));
+      showDialog(context: context, builder: (ctx) => errorDialog);
       setState(() {
         isLoading = false;
       });
@@ -93,38 +94,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : products.isEmpty
-              ? const SweatSmileImage()
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    await productsObject.refresh().then((_) {
-                      setState(() {
-                        if (filterOption == FilterOptions.favorites) {
-                          products = productsObject.favoriteProducts;
-                        } else {
-                          products = productsObject.products;
-                        }
-                      });
-                    }).catchError((error) {
-                      showDialog(
-                          context: context,
-                          builder: (ctx) => const ErrorDialog());
-                    });
-                  },
-                  child: GridView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 3 / 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+          : RefreshIndicator(
+              onRefresh: () async {
+                await productsObject.refresh().then((_) {
+                  setState(() {
+                    if (filterOption == FilterOptions.favorites) {
+                      products = productsObject.favoriteProducts;
+                    } else {
+                      products = productsObject.products;
+                    }
+                  });
+                }).catchError((error) {
+                  showDialog(context: context, builder: (ctx) => errorDialog);
+                });
+              },
+              child: products.isEmpty
+                  ? const SweatSmileImage()
+                  : GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 3 / 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+                          value: products[index], child: const ProductItem()),
+                      itemCount: products.length,
                     ),
-                    itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-                        value: products[index], child: const ProductItem()),
-                    itemCount: products.length,
-                  ),
-                ),
+            ),
       drawer: const MainDrawer(),
     );
   }

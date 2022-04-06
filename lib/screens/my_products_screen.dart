@@ -19,6 +19,30 @@ class MyProductsScreen extends StatefulWidget {
 
 class _MyProductsScreenState extends State<MyProductsScreen> {
   List<Product> myProducts = [];
+  bool isLoading = false;
+
+  final errorDialog = const ErrorDialog(
+    title: 'Error Loading Products 😅',
+    content:
+        'Probably an Internet issue, or Maybe... there are No Products! (Hint: Add Some then! 🤭)',
+    buttonMessage: 'Alrighty bud! 😼',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration.zero).then((_) async {
+      setState(() {
+        isLoading = true;
+      });
+      await Provider.of<Products>(context, listen: false).refresh();
+    }).catchError((error) {
+      showDialog(context: context, builder: (ctx) => errorDialog);
+    }).then((value) => setState(() {
+          isLoading = false;
+        }));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,25 +83,29 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               icon: const Icon(Icons.add))
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await productsData.refresh().catchError(
-                (_) => showDialog(
-                  context: context,
-                  builder: (ctx) => const ErrorDialog(),
-                ),
-              );
-          setState(() {
-            myProducts = Provider.of<Products>(context, listen: false).products;
-          });
-        },
-        child: myProducts.isEmpty
-            ? const SweatSmileImage()
-            : ListView.builder(
-                itemBuilder: (ctx, index) => MyProductItem(myProducts[index]),
-                itemCount: myProducts.length,
-              ),
-      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () async {
+                await productsData.refresh().catchError(
+                      (_) => showDialog(
+                        context: context,
+                        builder: (ctx) => errorDialog,
+                      ),
+                    );
+                setState(() {
+                  myProducts =
+                      Provider.of<Products>(context, listen: false).products;
+                });
+              },
+              child: myProducts.isEmpty
+                  ? const SweatSmileImage()
+                  : ListView.builder(
+                      itemBuilder: (ctx, index) =>
+                          MyProductItem(myProducts[index]),
+                      itemCount: myProducts.length,
+                    ),
+            ),
       drawer: const MainDrawer(),
     );
   }
