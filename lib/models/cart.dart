@@ -8,8 +8,8 @@ class CartItemData {
   int quantity;
   String id = '';
 
-  CartItemData(this.product, {this.quantity = 1}) {
-    id = product.id.toString() + quantity.hashCode.toString();
+  CartItemData(this.product, {this.quantity = 1, this.id = ''}) {
+    id = id == '' ? product.id.toString() + quantity.hashCode.toString() : id;
   }
 }
 
@@ -71,7 +71,7 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
-  void update(Products productsData) {
+  bool update(Products productsData) {
     bool didChange =
         _items.any((ci) => !productsData.products.contains(ci.product));
 
@@ -82,5 +82,6 @@ class Cart with ChangeNotifier {
 
       notifyListeners();
     }
+    return didChange;
   }
 }

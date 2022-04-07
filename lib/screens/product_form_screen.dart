@@ -243,6 +243,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                   return null;
                                 },
                                 onChanged: (val) {
+                                  _imageField.currentState!.setValue(_imageField
+                                      .currentState!.value
+                                      .toString()
+                                      .trim());
                                   bool isValid =
                                       _imageField.currentState?.validate() ??
                                           false;
