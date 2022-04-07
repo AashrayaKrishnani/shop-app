@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'product.dart';
+import 'products.dart';
 
 class CartItemData {
   final Product product;
   int quantity;
   String id = '';
 
-  CartItemData(this.product, {this.quantity = 1}) {
-    id = product.id.toString() + quantity.hashCode.toString();
+  CartItemData(this.product, {this.quantity = 1, this.id = ''}) {
+    id = id == '' ? product.id.toString() + quantity.hashCode.toString() : id;
   }
 }
 
@@ -68,5 +69,19 @@ class Cart with ChangeNotifier {
   void clear() {
     _items.clear();
     notifyListeners();
+  }
+
+  bool update(Products productsData) {
+    bool didChange =
+        _items.any((ci) => !productsData.products.contains(ci.product));
+
+    if (didChange) {
+      _items = _items
+          .where((ci) => productsData.products.contains(ci.product))
+          .toList();
+
+      notifyListeners();
+    }
+    return didChange;
   }
 }

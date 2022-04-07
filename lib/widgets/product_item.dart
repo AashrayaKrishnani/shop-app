@@ -3,33 +3,48 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 
+import '../helpers.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 
 class ProductItem extends StatelessWidget {
   const ProductItem({Key? key}) : super(key: key);
 
-  void favoriteButtonPressed(Product product, BuildContext context) {
-    product.toggleFavorite();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: Duration(
-          seconds: product.isFavorite ? 1 : 2,
+  void favoriteButtonPressed(Product product, BuildContext context) async {
+    try {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(
+            seconds: !product.isFavorite ? 1 : 2,
+          ),
+          content: Text(!product.isFavorite
+              ? 'Added to Favorites! ❤'
+              : 'Removed From Favorites. 😥'),
+          backgroundColor: !product.isFavorite
+              ? Theme.of(context).colorScheme.tertiary
+              : Colors.black87,
+          action: product.isFavorite
+              ? SnackBarAction(
+                  label: '❤ ADD IT BACK ❤',
+                  onPressed: () => favoriteButtonPressed(product, context))
+              : null,
         ),
-        content: Text(product.isFavorite
-            ? 'Added to Favorites! ❤'
-            : 'Removed From Favorites. 😥'),
-        backgroundColor: product.isFavorite
-            ? Theme.of(context).colorScheme.tertiary
-            : Colors.black87,
-        action: !product.isFavorite
-            ? SnackBarAction(
-                label: '❤ ADD IT BACK ❤',
-                onPressed: () => favoriteButtonPressed(product, context))
-            : null,
-      ),
-    );
+      );
+      await product.toggleFavorite();
+    } catch (error) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(
+            seconds: product.isFavorite ? 1 : 2,
+          ),
+          content: const Text('Error Changing Status, Rolling Back Changes.'),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+      return;
+    }
   }
 
   void cartButtonPressed(Cart cart, Product product, BuildContext context) {
@@ -55,10 +70,14 @@ class ProductItem extends StatelessWidget {
 
     return GridTile(
       child: GestureDetector(
-        onTap: () => Navigator.of(context)
-            .pushNamed(ProductScreen.route, arguments: product),
-        child: Image(
-          image: product.image.image,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: ((context) => ChangeNotifierProvider.value(
+                value: product, child: const ProductScreen())),
+          ),
+        ),
+        child: Image.network(
+          product.imageUrl,
           fit: BoxFit.contain,
         ),
       ),
@@ -77,7 +96,7 @@ class ProductItem extends StatelessWidget {
                   style: const TextStyle(fontSize: 20),
                 ),
                 Text(
-                  '\$ ' + product.price.toString(),
+                  '\$ ' + formatAmt(product.price).toString(),
                   style: const TextStyle(fontSize: 13),
                   textAlign: TextAlign.center,
                 ),

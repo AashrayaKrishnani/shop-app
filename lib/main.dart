@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (BuildContext context) => Products()),
+        ChangeNotifierProvider(create: (ctx) => Products()),
         ChangeNotifierProvider(create: (BuildContext context) => Cart()),
         ChangeNotifierProvider(create: ((context) => Orders())),
       ],

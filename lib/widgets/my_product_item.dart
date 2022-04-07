@@ -5,23 +5,30 @@ import 'package:shop_app/screens/product_form_screen.dart';
 import '../models/product.dart';
 import '../models/products.dart';
 
-class MyProductItem extends StatelessWidget {
+class MyProductItem extends StatefulWidget {
   final Product product;
 
   const MyProductItem(this.product, {Key? key}) : super(key: key);
 
   @override
+  State<MyProductItem> createState() => _MyProductItemState();
+}
+
+class _MyProductItemState extends State<MyProductItem> {
+  @override
   Widget build(BuildContext context) {
+    final sms = ScaffoldMessenger.of(context);
+
     return Card(
       margin: const EdgeInsets.all(10),
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundImage: product.image.image,
+            backgroundImage: NetworkImage(widget.product.imageUrl),
           ),
-          title: Text(product.title),
-          subtitle: Text(product.description),
+          title: Text(widget.product.title),
+          subtitle: Text(widget.product.description),
           trailing: SizedBox(
             width: 100,
             child: Row(
@@ -30,12 +37,13 @@ class MyProductItem extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     Navigator.of(context)
-                        .pushNamed(ProductFormScreen.route, arguments: product)
+                        .pushNamed(ProductFormScreen.route,
+                            arguments: widget.product)
                         .then((value) {
                       bool result = value == null ? (false) : (value as bool);
 
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      sms.hideCurrentSnackBar();
+                      sms.showSnackBar(
                         SnackBar(
                           duration: const Duration(
                             seconds: 2,
@@ -56,16 +64,17 @@ class MyProductItem extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
+                  onPressed: () async {
                     showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: const Text('Really Want to Delete?'),
                         content: ListTile(
-                          title: Text(product.title),
-                          subtitle: Text('\$${product.price}'),
+                          title: Text(widget.product.title),
+                          subtitle: Text('\$${widget.product.price}'),
                           trailing: CircleAvatar(
-                            backgroundImage: product.image.image,
+                            backgroundImage:
+                                NetworkImage(widget.product.imageUrl),
                           ),
                         ),
                         actions: [
@@ -84,29 +93,48 @@ class MyProductItem extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ).then((confirmDelete) {
-                      confirmDelete ??= false;
-                      if (confirmDelete) {
-                        Provider.of<Products>(context, listen: false)
-                            .removeProduct(product);
-                      }
+                    ).then(
+                      (confirmDelete) async {
+                        confirmDelete ??= false;
 
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: const Duration(
-                            seconds: 2,
-                          ),
-                          content: Text(
-                            confirmDelete
-                                ? 'Succesfully Deleted.'
-                                : 'Cancelled Succesfully.',
-                          ),
-                          backgroundColor:
-                              confirmDelete ? Colors.green : Colors.red,
-                        ),
-                      );
-                    });
+                        sms.hideCurrentSnackBar();
+
+                        if (confirmDelete) {
+                          await Provider.of<Products>(context, listen: false)
+                              .removeProduct(widget.product)
+                              .then((_) {
+                            sms.showSnackBar(
+                              SnackBar(
+                                duration: const Duration(
+                                  seconds: 2,
+                                ),
+                                content: Text(
+                                  confirmDelete
+                                      ? 'Succesfully Deleted.'
+                                      : 'Cancelled Succesfully.',
+                                ),
+                                backgroundColor:
+                                    confirmDelete ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }).catchError(
+                            (error) async {
+                              sms.showSnackBar(
+                                const SnackBar(
+                                  duration: Duration(
+                                    seconds: 2,
+                                  ),
+                                  content: Text(
+                                    'Error: Unable to Delete. 🤯',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    );
                   },
                   icon: Icon(
                     Icons.delete,
