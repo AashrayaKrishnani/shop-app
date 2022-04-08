@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/http_exception.dart';
 import '../models/product.dart';
 import '../models/products.dart';
 
@@ -74,7 +75,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         Navigator.of(context).pop(true);
       }
     } catch (error) {
-      Navigator.of(context).pop(Exception('Something Went Wrong. 😅'));
+      Navigator.of(context).pop(HttpException('Something Went Wrong. 😅'));
     }
   }
 

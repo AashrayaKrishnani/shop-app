@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'firebase.dart';
+import 'http_exception.dart';
 
 class Product with ChangeNotifier {
   final String id;
@@ -31,7 +32,7 @@ class Product with ChangeNotifier {
       // Rolling back changes
       isFavorite = oldStatus;
       notifyListeners();
-      throw Exception('Error Updating Favorite status to server.');
+      throw HttpException('Error Updating Favorite status to server.');
     }
   }
 }
