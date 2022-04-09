@@ -24,7 +24,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   final errorDialog = const ErrorDialog(
     title: 'Error Loading Products 😅',
     content:
-        'Probably an Internet issue, or Maybe... there are No Products! (Hint: Add Some then! 🤭)',
+        'Probably an Internet issue, or Maybe... You haven\'t added any Products Yet! (Hint: Add Some then! 🤭)',
     buttonMessage: 'Alrighty bud! 😼',
   );
 
@@ -36,7 +36,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       setState(() {
         isLoading = true;
       });
-      await Provider.of<Products>(context, listen: false).refresh();
+      await Provider.of<Products>(context, listen: false).refresh(true);
     }).catchError((error) {
       showDialog(context: context, builder: (ctx) => errorDialog);
     }).then((value) => setState(() {
@@ -87,7 +87,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
-                await productsData.refresh().catchError(
+                await productsData.refresh(true).catchError(
                       (_) => showDialog(
                         context: context,
                         builder: (ctx) => errorDialog,

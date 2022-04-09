@@ -7,8 +7,9 @@ import 'package:shop_app/screens/auth_screen.dart';
 class Auth with ChangeNotifier {
   String? _email;
   String? _password;
-  DateTime? _expiry; // Firebase Tokens expire in an hour by default.
-  String? _token;
+  static String? _id;
+  static DateTime? _expiry; // Firebase Tokens expire in an hour by default.
+  static String? _token;
 
   bool get isIn {
     if (token != '') {
@@ -18,9 +19,16 @@ class Auth with ChangeNotifier {
     return false;
   }
 
-  String get token {
+  static String get token {
     if (_token != null && DateTime.now().isBefore(_expiry!)) {
       return _token!;
+    }
+    return '';
+  }
+
+  static String get id {
+    if (token != '') {
+      return _id!;
     }
     return '';
   }
@@ -53,6 +61,7 @@ class Auth with ChangeNotifier {
       _email = responseData['email'];
       _password = data['password'] as String;
       _token = responseData['idToken'];
+      _id = responseData['localId'];
       _expiry = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
       notifyListeners();

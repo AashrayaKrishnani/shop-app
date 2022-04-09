@@ -29,8 +29,9 @@ class _AuthCardState extends State<AuthCard> {
   var _showForgotPass = false;
   final _passwordController = TextEditingController();
 
-  void showErrorDialog(String title, String content, String buttonText) {
-    showDialog(
+  Future<dynamic> showErrorDialog(
+      String title, String content, String buttonText) {
+    return showDialog(
         context: context,
         builder: (ctx) => ErrorDialog(
               title: title,
@@ -80,20 +81,27 @@ class _AuthCardState extends State<AuthCard> {
         content =
             'It\'s our first time seeing that Email, please Sign Up so we can officially be Buddies! 🥳';
         buttonText = 'Yesss!! 😎';
-        setState(() {
-          _authMode = AuthMode.signup;
-        });
-      } else if (httpException.message.contains('INVALID_PASSWORD')) {
-        title = 'Forgot the Pass Again? 🤣';
-        content =
-            'Start Eating Almonds Bro!! 🤭 Just Kidding, \'Forgot Password\' Got your Back 😉';
-        buttonText = 'Yayy!!! 🥳';
-        setState(() {
-          _showForgotPass = true;
-        });
-      }
 
-      showErrorDialog(title, content, buttonText);
+        final decision = await showErrorDialog(title, content, buttonText);
+        if (decision != null) {
+          setState(() {
+            _authMode = AuthMode.signup;
+          });
+        } else if (httpException.message.contains('INVALID_PASSWORD')) {
+          title = 'Forgot the Pass Again? 🤣';
+          content =
+              'Start Eating Almonds Bro!! 🤭 Just Kidding, \'Forgot Password\' Got your Back 😉';
+          buttonText = 'Yayy!!! 🥳';
+          final decision = await showErrorDialog(title, content, buttonText);
+          if (decision != null) {
+            setState(() {
+              _showForgotPass = true;
+            });
+          }
+        }
+      } else {
+        showErrorDialog(title, content, buttonText);
+      }
     } catch (error) {
       showErrorDialog(title, content, buttonText);
     }

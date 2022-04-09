@@ -105,6 +105,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     }
                   });
                 }).catchError((error) {
+                  setState(() {
+                    products.clear();
+                  });
                   showDialog(context: context, builder: (ctx) => errorDialog);
                 });
               },

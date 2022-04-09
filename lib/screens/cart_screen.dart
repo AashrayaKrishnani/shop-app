@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/screens/orders_screen.dart';
+import 'package:shop_app/screens/products_screen.dart';
 import 'package:shop_app/widgets/cart_item.dart';
 
 import '../models/cart.dart';
@@ -90,8 +92,14 @@ class _CartScreenState extends State<CartScreen> {
                                               borderRadius:
                                                   BorderRadius.circular(5)),
                                           child: TextButton(
-                                            onPressed: () =>
-                                                sms.clearMaterialBanners(),
+                                            onPressed: () {
+                                              sms.clearMaterialBanners();
+                                              final nav = Navigator.of(context);
+                                              nav.popUntil((route) =>
+                                                  route.settings.name ==
+                                                  ProductsScreen.route);
+                                              nav.pushNamed(OrdersScreen.route);
+                                            },
                                             child: Text(
                                               'Okie! 😼',
                                               style: TextStyle(

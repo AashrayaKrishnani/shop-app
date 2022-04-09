@@ -10,6 +10,7 @@ import 'package:shop_app/screens/product_form_screen.dart';
 import 'package:shop_app/screens/product_screen.dart';
 import 'package:shop_app/screens/products_screen.dart';
 
+import 'models/firebase.dart';
 import 'models/orders.dart';
 import 'models/products.dart';
 
@@ -24,10 +25,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (ctx) => Auth()),
         ChangeNotifierProvider(create: (ctx) => Products()),
         ChangeNotifierProvider(create: (BuildContext context) => Cart()),
         ChangeNotifierProvider(create: ((context) => Orders())),
-        ChangeNotifierProvider(create: (ctx) => Auth()),
       ],
       child: Consumer<Auth>(
         builder: (ctx, auth, child) => MaterialApp(
