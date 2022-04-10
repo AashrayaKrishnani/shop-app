@@ -1,9 +1,13 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_form_screen.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/my_product_item.dart';
 
+import '../models/auth.dart';
 import '../models/product.dart';
 import '../models/products.dart';
 import '../widgets/error_dialog.dart';
@@ -24,7 +28,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   final errorDialog = const ErrorDialog(
     title: 'Error Loading Products 😅',
     content:
-        'Probably an Internet issue, or Maybe... there are No Products! (Hint: Add Some then! 🤭)',
+        'Probably an Internet issue, or Maybe... You haven\'t added any Products Yet! (Hint: Add Some then! 🤭)',
     buttonMessage: 'Alrighty bud! 😼',
   );
 
@@ -36,7 +40,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       setState(() {
         isLoading = true;
       });
-      await Provider.of<Products>(context, listen: false).refresh();
+      await Provider.of<Products>(context, listen: false).refresh(true);
     }).catchError((error) {
       showDialog(context: context, builder: (ctx) => errorDialog);
     }).then((value) => setState(() {
@@ -48,6 +52,12 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   Widget build(BuildContext context) {
     final Products productsData = Provider.of<Products>(context);
     myProducts = productsData.products;
+
+    // Checking if Authenticated.
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -84,10 +94,12 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingSpinner(
+              message: 'My Precious! 😻',
+            )
           : RefreshIndicator(
               onRefresh: () async {
-                await productsData.refresh().catchError(
+                await productsData.refresh(true).catchError(
                       (_) => showDialog(
                         context: context,
                         builder: (ctx) => errorDialog,

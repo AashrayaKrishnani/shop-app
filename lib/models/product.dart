@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'auth.dart';
 import 'firebase.dart';
+import 'http_exception.dart';
 
 class Product with ChangeNotifier {
   final String id;
@@ -26,12 +28,12 @@ class Product with ChangeNotifier {
 
     // Try To Update Web and Roll back if there are issues.
     try {
-      await Firebase.patchData('products/$id.json', {'isFavorite': !oldStatus});
+      await Firebase.putData('favorites/${Auth.id}/$id.json', !oldStatus);
     } catch (error) {
       // Rolling back changes
       isFavorite = oldStatus;
       notifyListeners();
-      throw Exception('Error Updating Favorite status to server.');
+      throw HttpException('Error Updating Favorite status to server.');
     }
   }
 }

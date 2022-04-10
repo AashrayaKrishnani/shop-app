@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shop_app/models/product.dart';
 
+import 'auth.dart';
 import 'cart.dart';
 import 'firebase.dart';
 
@@ -48,7 +49,7 @@ class Orders with ChangeNotifier {
     }
 
     // Adding Order to Server
-    final response = await Firebase.postData('orders.json', {
+    final response = await Firebase.postData('orders/${Auth.id}.json', {
       'total': total,
       'cartItemList': cartItems,
       'dateTime': now.toIso8601String(),
@@ -63,7 +64,7 @@ class Orders with ChangeNotifier {
   Future<void> refresh() async {
     Map<dynamic, dynamic> map;
     try {
-      final response = await Firebase.getData('orders.json');
+      final response = await Firebase.getData('orders/${Auth.id}.json');
       map = json.decode(response.body) as Map<String, dynamic>;
     } catch (error) {
       _orders = [];
@@ -92,10 +93,7 @@ class Orders with ChangeNotifier {
           id: id));
     });
 
-    if (fromServer.any((p1) => !_orders.any((p2) => p2.id == p1.id)) ||
-        _orders.any((p1) => !fromServer.any((p2) => p2.id == p1.id))) {
-      _orders = fromServer;
-      notifyListeners();
-    }
+    _orders = fromServer;
+    notifyListeners();
   }
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'auth.dart';
 import 'firebase.dart';
 import 'product.dart';
 
@@ -23,12 +24,12 @@ class Products with ChangeNotifier {
       required String description,
       required double price,
       required String imageUrl}) async {
-    final response = await Firebase.postData('products.json', {
+    final response = await Firebase.postData('products/${Auth.id}.json', {
       'title': title,
       'description': description,
       'price': price,
       'imageUrl': imageUrl,
-      'isFavorite': false,
+      'creatorId': Auth.id,
     });
 
     String id =
@@ -51,7 +52,7 @@ class Products with ChangeNotifier {
     notifyListeners();
 
     try {
-      await Firebase.deleteData('products/${product.id}.json');
+      await Firebase.deleteData('products/${Auth.id}/${product.id}.json');
     } catch (error) {
       // Roll Back Changes
       _products.insert(index, backup);
@@ -62,12 +63,11 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(Product product) async {
     if (_products.any((p) => p.id == product.id)) {
-      await Firebase.patchData('products/${product.id}.json', {
+      await Firebase.patchData('products/${Auth.id}/${product.id}.json', {
         'title': product.title,
         'description': product.description,
         'price': product.price,
         'imageUrl': product.imageUrl,
-        'isFavorite': product.isFavorite,
       });
       _products.removeWhere((p) => p.id == product.id);
       _products.add(product);
@@ -75,36 +75,52 @@ class Products with ChangeNotifier {
     }
   }
 
-  Future<void> refresh() async {
-    var map;
+  Future<void> refresh([onlyUserProducts = false]) async {
     try {
-      final response = await Firebase.getData('products.json');
-      map = json.decode(response.body) as Map<String, dynamic>;
+      // Getting the Products Data.
+      String verb =
+          onlyUserProducts ? 'products/${Auth.id}.json' : 'products.json';
+
+      final response = await Firebase.getData(verb);
+
+      // Getting the Favorites Data.
+      final favoritesData = await Firebase.getData('favorites/${Auth.id}.json');
+
+      // Decoding.
+      final favorites = json.decode(favoritesData.body);
+      final idDataMap = onlyUserProducts
+          ? {Auth.id: json.decode(response.body) as Map<String, dynamic>}
+          : json.decode(response.body) as Map<String, dynamic>;
+
+      // Updating.
+      List<Product> fromServer = [];
+
+      idDataMap.forEach((uid, userProducts) {
+        if (userProducts != null) {
+          (userProducts as Map<String, dynamic>).forEach((id, data) {
+            bool isFavorite =
+                favorites == null ? false : favorites[id] ?? false;
+
+            fromServer.add(
+              Product(
+                id: id,
+                title: data['title'],
+                description: data["description"],
+                price: data["price"],
+                imageUrl: data['imageUrl'],
+                isFavorite: isFavorite,
+              ),
+            );
+          });
+        }
+      });
+
+      _products = fromServer;
+      notifyListeners();
     } catch (error) {
       _products = [];
       notifyListeners();
       rethrow;
-    }
-
-    List<Product> fromServer = [];
-
-    map.forEach((id, data) {
-      fromServer.add(
-        Product(
-          id: id,
-          title: data['title'],
-          description: data["description"],
-          price: data["price"],
-          imageUrl: data['imageUrl'],
-          isFavorite: data['isFavorite'],
-        ),
-      );
-    });
-
-    if (fromServer.any((p1) => !_products.any((p2) => p2.id == p1.id)) ||
-        _products.any((p1) => !fromServer.any((p2) => p2.id == p1.id))) {
-      _products = fromServer;
-      notifyListeners();
     }
   }
 }

@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/error_dialog.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 import 'package:shop_app/widgets/sweat_smile_image.dart';
 
+import '../models/auth.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 import '../models/products.dart';
@@ -58,6 +60,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
     if (products.isEmpty) {
       products = productsObject.products;
     }
+
+    // Checking if Authenticated.
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shop 🛒'),
@@ -93,7 +102,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingSpinner(
+              message: 'Loading Products! 😼',
+            )
           : RefreshIndicator(
               onRefresh: () async {
                 await productsObject.refresh().then((_) {
@@ -105,6 +116,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     }
                   });
                 }).catchError((error) {
+                  setState(() {
+                    products.clear();
+                  });
                   showDialog(context: context, builder: (ctx) => errorDialog);
                 });
               },

@@ -29,7 +29,7 @@ class ErrorDialog extends StatelessWidget {
         ElevatedButton(
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.white)),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(true),
             child: Text(
               buttonMessage,
               style: const TextStyle(color: Colors.red),
