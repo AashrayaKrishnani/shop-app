@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/auth.dart';
 import '../models/http_exception.dart';
 import '../models/product.dart';
 import '../models/products.dart';
@@ -96,6 +97,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
+    // Initializing values if we enter via Edit Route
     if (init) {
       if (ModalRoute.of(context)?.settings.arguments != null) {
         _product = ModalRoute.of(context)?.settings.arguments as Product;
@@ -104,6 +106,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (_type == ProductFormType.edit) _imageUrl = _product!.imageUrl;
       init = false;
     }
+
+    // Checking if Authenticated.
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+      nav.pushReplacementNamed('/');
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_type == ProductFormType.edit

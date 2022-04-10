@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/models/products.dart';
 
+import '../models/auth.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 import '../widgets/badge.dart';

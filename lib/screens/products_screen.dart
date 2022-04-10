@@ -5,6 +5,7 @@ import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/error_dialog.dart';
 import 'package:shop_app/widgets/sweat_smile_image.dart';
 
+import '../models/auth.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 import '../models/products.dart';
@@ -58,6 +59,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
     if (products.isEmpty) {
       products = productsObject.products;
     }
+
+    // Checking if Authenticated.
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+      nav.pushReplacementNamed('/');
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shop 🛒'),

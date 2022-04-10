@@ -5,6 +5,7 @@ import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/order_item.dart';
 import 'package:shop_app/widgets/sweat_smile_image.dart';
 
+import '../models/auth.dart';
 import '../models/orders.dart';
 
 class OrdersScreen extends StatefulWidget {

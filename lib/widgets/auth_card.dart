@@ -23,7 +23,6 @@ class _AuthCardState extends State<AuthCard> {
   var _authData = {
     'email': '',
     'password': '',
-    'returnSecureToken': true,
   };
   var _isLoading = false;
   var _showForgotPass = false;
@@ -103,7 +102,9 @@ class _AuthCardState extends State<AuthCard> {
         showErrorDialog(title, content, buttonText);
       }
     } catch (error) {
-      showErrorDialog(title, content, buttonText);
+      if (mounted) {
+        showErrorDialog(title, content, buttonText);
+      }
     }
 
     setState(() {
@@ -127,8 +128,30 @@ class _AuthCardState extends State<AuthCard> {
   }
 
   @override
+  void initState() {
+    if (Provider.of<Auth>(context, listen: false).loggedOutByError) {
+      Future.delayed(Duration.zero).then((_) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(
+              seconds: 3,
+            ),
+            content: const Text(
+              'Login Timed Out! Kindly Login Again! 😼',
+            ),
+            backgroundColor: Theme.of(context).errorColor,
+          ),
+        );
+      });
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),

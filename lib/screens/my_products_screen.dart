@@ -1,9 +1,12 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_form_screen.dart';
 import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/my_product_item.dart';
 
+import '../models/auth.dart';
 import '../models/product.dart';
 import '../models/products.dart';
 import '../widgets/error_dialog.dart';
@@ -48,6 +51,13 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   Widget build(BuildContext context) {
     final Products productsData = Provider.of<Products>(context);
     myProducts = productsData.products;
+
+    // Checking if Authenticated.
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+      nav.pushReplacementNamed('/');
+    }
 
     return Scaffold(
       appBar: AppBar(
