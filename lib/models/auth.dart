@@ -63,12 +63,11 @@ class Auth with ChangeNotifier {
     }
 
     try {
-      print('waiting for response');
       final response = await post(
         Uri.parse(url),
         body: json.encode(data),
       );
-      print('server responded');
+
       // Error Checking
       if (response.statusCode >= 400) {
         try {
@@ -79,14 +78,14 @@ class Auth with ChangeNotifier {
       }
 
       final responseData = json.decode(response.body) as Map<String, dynamic>;
-      print('got response');
+
       _email = responseData['email'];
       _password = data['password'] as String;
       _token = responseData['idToken'];
       _id = responseData['localId'];
       _expiry = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
-      print('LoginSuccessful notifying now');
+
       notifyListeners();
       await storePrefs();
       // Setting up timer to auto refresh token.
@@ -146,24 +145,19 @@ class Auth with ChangeNotifier {
 
   Future<void> storePrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    print('Got The Instance');
     final data = json.encode({'email': _email, 'password': _password});
     await prefs.setString('userData', data);
-    print('prefs stored successfully');
   }
 
   Future<void> clearPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    print('Cleared prefernces');
   }
 
   Future<dynamic> getPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('userData')) {
       final data = json.decode(prefs.getString('userData') as String);
-      print('Got Data.');
-      print(data);
       return data;
     } else {
       return null;

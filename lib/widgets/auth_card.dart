@@ -45,7 +45,6 @@ class _AuthCardState extends State<AuthCard> {
     if (validate) {
       if (!_formKey.currentState!.validate()) {
         // Invalid!
-        print('invalid');
         return;
       }
 
@@ -183,8 +182,6 @@ class _AuthCardState extends State<AuthCard> {
                 _authData['password'] == '' &&
                 snapshot.connectionState == ConnectionState.done &&
                 snapshot.data != null) {
-              print('Here');
-
               Future.delayed(Duration.zero).then((_) async {
                 setState(
                   () {
