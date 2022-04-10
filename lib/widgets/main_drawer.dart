@@ -39,14 +39,6 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-
-    if (!Provider.of<Auth>(context).isIn) {
-      final nav = Navigator.of(context);
-      nav.popUntil((route) => !nav.canPop());
-      nav.pushReplacementNamed('/');
-    }
-
     return Drawer(
       backgroundColor: Theme.of(context).primaryColor,
       child: Column(
@@ -110,12 +102,16 @@ class MainDrawer extends StatelessWidget {
           Column(
             children: [
               const Divider(),
-              buildListTile(context, Icons.logout, 'LogOut 🚪', () {
-                final nav = Navigator.of(context);
-                nav.pop();
-                nav.pushReplacementNamed('/');
-                Provider.of<Auth>(context, listen: false).logout();
-              }),
+              buildListTile(
+                context,
+                Icons.logout,
+                'LogOut 🚪',
+                () async {
+                  final nav = Navigator.of(context);
+                  nav.pushReplacementNamed('/');
+                  await Provider.of<Auth>(context, listen: false).logout();
+                },
+              ),
             ],
           ),
         ],

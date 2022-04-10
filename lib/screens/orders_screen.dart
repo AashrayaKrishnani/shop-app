@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/widgets/error_dialog.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/order_item.dart';
 import 'package:shop_app/widgets/sweat_smile_image.dart';
@@ -52,6 +53,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final Orders ordersData = Provider.of<Orders>(context);
     orders = ordersData.orders;
 
+    if (!Provider.of<Auth>(context).isIn) {
+      final nav = Navigator.of(context);
+      nav.popUntil((route) => !nav.canPop());
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Orders! 😍'),
@@ -69,7 +75,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
           });
         },
         child: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const LoadingSpinner(
+                message: 'Orders En Route! 🚚',
+              )
             : orders.isEmpty
                 ? const SweatSmileImage()
                 : ListView.builder(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/error_dialog.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 import 'package:shop_app/widgets/sweat_smile_image.dart';
 
 import '../models/auth.dart';
@@ -64,7 +65,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     if (!Provider.of<Auth>(context).isIn) {
       final nav = Navigator.of(context);
       nav.popUntil((route) => !nav.canPop());
-      nav.pushReplacementNamed('/');
     }
 
     return Scaffold(
@@ -102,7 +102,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingSpinner(
+              message: 'Loading Products! 😼',
+            )
           : RefreshIndicator(
               onRefresh: () async {
                 await productsObject.refresh().then((_) {

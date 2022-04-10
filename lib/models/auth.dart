@@ -8,21 +8,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/auth_screen.dart';
 import 'http_exception.dart';
 
+enum LogOutReason { error, byChoice, none }
+
 class Auth with ChangeNotifier {
   String? _email;
   String? _password;
   static String? _id;
   static DateTime? _expiry; // Firebase Tokens expire in an hour by default.
   static String? _token;
-  bool _loggedOutByError = false;
+  LogOutReason _logOutReason = LogOutReason.none;
   Timer? _logInTimer;
 
-  bool get loggedOutByError {
-    if (_loggedOutByError) {
-      _loggedOutByError = false;
-      return true;
-    }
-    return _loggedOutByError;
+  LogOutReason get logOutReason {
+    final LogOutReason result = _logOutReason;
+    _logOutReason = LogOutReason.none;
+    return result;
   }
 
   bool get isIn {
@@ -47,7 +47,7 @@ class Auth with ChangeNotifier {
     return '';
   }
 
-  Future<dynamic> auth(AuthMode authMode, Map<Object, Object> data) async {
+  Future<dynamic> auth(AuthMode authMode, Map<dynamic, dynamic> data) async {
     // Default is Login.
     String url =
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAeh-EWIqfK0g4iZvzJR_8Kn_On4driKE0 ';
@@ -88,13 +88,13 @@ class Auth with ChangeNotifier {
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
       print('LoginSuccessful notifying now');
       notifyListeners();
-
+      await storePrefs();
       // Setting up timer to auto refresh token.
       _logInTimer = Timer(
           Duration(seconds: _expiry!.difference(DateTime.now()).inSeconds),
           () async {
         await auth(authMode, data).catchError((error) {
-          _loggedOutByError = true;
+          _logOutReason = LogOutReason.error;
           logout();
         });
       });
@@ -130,7 +130,7 @@ class Auth with ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
     _email = null;
     _password = null;
     _expiry = null;
@@ -138,23 +138,10 @@ class Auth with ChangeNotifier {
     _id = null;
     _logInTimer?.cancel();
     _logInTimer = null;
-
+    _logOutReason = LogOutReason.byChoice;
     // Clearing out Stored Data.
-    clearPrefs();
+    await clearPrefs();
     notifyListeners();
-  }
-
-  Future<bool> tryAutoLogin() async {
-    final data = await getPrefs();
-
-    if (data != null) {
-      print('Trying autologin.');
-      await auth(AuthMode.login, data);
-      print('AutoLogin Successful');
-      return true;
-    }
-
-    return false;
   }
 
   Future<void> storePrefs() async {

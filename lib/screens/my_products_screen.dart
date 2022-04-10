@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_form_screen.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/my_product_item.dart';
 
@@ -56,7 +57,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     if (!Provider.of<Auth>(context).isIn) {
       final nav = Navigator.of(context);
       nav.popUntil((route) => !nav.canPop());
-      nav.pushReplacementNamed('/');
     }
 
     return Scaffold(
@@ -94,7 +94,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingSpinner(
+              message: 'My Precious! 😻',
+            )
           : RefreshIndicator(
               onRefresh: () async {
                 await productsData.refresh(true).catchError(

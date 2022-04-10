@@ -32,27 +32,25 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => Orders())),
       ],
       child: Consumer<Auth>(
-        builder: (ctx, auth, child) => FutureBuilder(builder: (ctx, snapshot) {
-          return MaterialApp(
-            title: 'Shop App',
-            theme: ThemeData(
-              colorScheme: const ColorScheme.light(
-                  primary: Colors.indigo,
-                  secondary: Colors.amber,
-                  tertiary: Colors.pinkAccent),
-              fontFamily: 'Lato',
-            ),
-            home: auth.isIn ? const ProductsScreen() : const AuthScreen(),
-            routes: {
-              ProductsScreen.route: (ctx) => const ProductsScreen(),
-              ProductScreen.route: (ctx) => const ProductScreen(),
-              CartScreen.route: (ctx) => const CartScreen(),
-              OrdersScreen.route: (ctx) => const OrdersScreen(),
-              MyProductsScreen.route: (ctx) => const MyProductsScreen(),
-              ProductFormScreen.route: (ctx) => const ProductFormScreen(),
-            },
-          );
-        }),
+        builder: (ctx, auth, child) => MaterialApp(
+          title: 'Shop App',
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(
+                primary: Colors.indigo,
+                secondary: Colors.amber,
+                tertiary: Colors.pinkAccent),
+            fontFamily: 'Lato',
+          ),
+          home: auth.isIn ? const ProductsScreen() : const AuthScreen(),
+          routes: {
+            ProductsScreen.route: (ctx) => const ProductsScreen(),
+            ProductScreen.route: (ctx) => const ProductScreen(),
+            CartScreen.route: (ctx) => const CartScreen(),
+            OrdersScreen.route: (ctx) => const OrdersScreen(),
+            MyProductsScreen.route: (ctx) => const MyProductsScreen(),
+            ProductFormScreen.route: (ctx) => const ProductFormScreen(),
+          },
+        ),
       ),
     );
   }

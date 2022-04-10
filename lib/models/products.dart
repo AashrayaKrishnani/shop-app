@@ -52,7 +52,7 @@ class Products with ChangeNotifier {
     notifyListeners();
 
     try {
-      await Firebase.deleteData('products/${product.id}.json');
+      await Firebase.deleteData('products/${Auth.id}/${product.id}.json');
     } catch (error) {
       // Roll Back Changes
       _products.insert(index, backup);

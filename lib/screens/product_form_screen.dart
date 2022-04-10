@@ -5,6 +5,7 @@ import '../models/auth.dart';
 import '../models/http_exception.dart';
 import '../models/product.dart';
 import '../models/products.dart';
+import '../widgets/loading_spinner.dart';
 
 enum ProductFormType {
   edit,
@@ -121,7 +122,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             : 'Add New Product.'),
       ),
       body: isUploading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingSpinner(
+              message: 'Submitting Form! 📄',
+            )
           : Form(
               key: _form,
               child: SingleChildScrollView(

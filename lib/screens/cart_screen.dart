@@ -8,6 +8,7 @@ import '../models/cart.dart';
 import '../models/orders.dart';
 import '../models/products.dart';
 import '../widgets/error_dialog.dart';
+import '../widgets/loading_spinner.dart';
 
 class CartScreen extends StatefulWidget {
   static const String route = '/cart';
@@ -143,7 +144,9 @@ class _CartScreenState extends State<CartScreen> {
                         0,
                         0,
                       ),
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: const LoadingSpinner(
+                        message: 'Placing Your Orderrrr! 🥳',
+                      ),
                     )
                   : Expanded(
                       child: ListView.builder(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/widgets/loading_spinner.dart';
 
 import '../models/auth.dart';
 import '../models/http_exception.dart';
@@ -20,12 +21,13 @@ class _AuthCardState extends State<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.login;
   // ignore: prefer_final_fields
-  var _authData = {
+  Map<String, dynamic> _authData = {
     'email': '',
     'password': '',
   };
   var _isLoading = false;
   var _showForgotPass = false;
+  var _autoLogin = false;
   final _passwordController = TextEditingController();
 
   Future<dynamic> showErrorDialog(
@@ -39,15 +41,19 @@ class _AuthCardState extends State<AuthCard> {
             ));
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      // Invalid!
-      return;
+  Future<void> _submit({bool validate = true}) async {
+    if (validate) {
+      if (!_formKey.currentState!.validate()) {
+        // Invalid!
+        print('invalid');
+        return;
+      }
+
+      _formKey.currentState?.save();
+      setState(() {
+        _isLoading = true;
+      });
     }
-    _formKey.currentState?.save();
-    setState(() {
-      _isLoading = true;
-    });
 
     // For Error Handling
     String title = 'Oopsies! 😅';
@@ -57,15 +63,16 @@ class _AuthCardState extends State<AuthCard> {
 
     // Sending Data to Server.
     try {
+      final sms = ScaffoldMessenger.of(context);
       await Provider.of<Auth>(context, listen: false)
           .auth(_authMode, _authData);
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(
+      sms.hideCurrentSnackBar();
+      sms.showSnackBar(
+        SnackBar(
+          duration: const Duration(
             seconds: 2,
           ),
-          content: Text('Yay We In! 🥳'),
+          content: Text(validate ? 'Yay We In! 🥳' : 'Welcome Back! 🥳'),
           backgroundColor: Colors.green,
         ),
       );
@@ -107,11 +114,14 @@ class _AuthCardState extends State<AuthCard> {
       }
     }
 
-    setState(() {
-      _formKey.currentState?.reset();
-      _passwordController.clear();
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _autoLogin = false;
+        _formKey.currentState?.reset();
+        _passwordController.clear();
+        _isLoading = false;
+      });
+    }
   }
 
   void _switchAuthMode() {
@@ -129,7 +139,9 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   void initState() {
-    if (Provider.of<Auth>(context, listen: false).loggedOutByError) {
+    final LogOutReason logOutReason =
+        Provider.of<Auth>(context, listen: false).logOutReason;
+    if (logOutReason != LogOutReason.none) {
       Future.delayed(Duration.zero).then((_) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,8 +149,10 @@ class _AuthCardState extends State<AuthCard> {
             duration: const Duration(
               seconds: 3,
             ),
-            content: const Text(
-              'Login Timed Out! Kindly Login Again! 😼',
+            content: Text(
+              logOutReason == LogOutReason.error
+                  ? 'Login Timed Out! Kindly Login Again! 😼'
+                  : 'Logged Out Succesfully! Login Back Again to Enjoy! 🥳',
             ),
             backgroundColor: Theme.of(context).errorColor,
           ),
@@ -157,132 +171,162 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 8.0,
-      child: _authMode == AuthMode.forgotPass
-          ? ForgotPass(
-              callback: ({AuthMode authMode = AuthMode.login}) {
-                setState(() {
-                  _authMode = authMode;
-                });
-              },
-            )
-          : Container(
-              height: _authMode == AuthMode.signup
-                  ? 320
-                  : _showForgotPass
-                      ? 320
-                      : 260,
-              constraints: BoxConstraints(
-                  minHeight: _authMode == AuthMode.signup
-                      ? 320
-                      : _showForgotPass
-                          ? 320
-                          : 260),
-              width: deviceSize.width * 0.75,
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(
-                        decoration: const InputDecoration(labelText: 'E-Mail'),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value!.isEmpty || !value.contains('@')) {
-                            return 'Invalid email!';
-                          }
-                          return null;
-                        },
-                        onSaved: (value) {
-                          _authData['email'] = value!;
-                        },
-                      ),
-                      TextFormField(
-                        decoration:
-                            const InputDecoration(labelText: 'Password'),
-                        obscureText: true,
-                        controller: _passwordController,
-                        validator: (value) {
-                          if (value!.isEmpty || value.length <= 5) {
-                            return 'Password is too short!';
-                          }
-                        },
-                        onSaved: (value) {
-                          _authData['password'] = value!;
-                        },
-                      ),
-                      if (_authMode == AuthMode.signup)
-                        TextFormField(
-                          enabled: _authMode == AuthMode.signup,
-                          decoration: const InputDecoration(
-                              labelText: 'Confirm Password'),
-                          obscureText: true,
-                          validator: _authMode == AuthMode.signup
-                              ? (value) {
-                                  if (value != _passwordController.text) {
-                                    return 'Passwords do not match!';
-                                  }
+      child: FutureBuilder(
+          future: Provider.of<Auth>(context, listen: false).getPrefs(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                _autoLogin) {
+              return const LoadingSpinner(
+                message: 'Trying to Auto-Login! 😊',
+              );
+            } else if (_authData['email'] == '' &&
+                _authData['password'] == '' &&
+                snapshot.connectionState == ConnectionState.done &&
+                snapshot.data != null) {
+              print('Here');
+
+              Future.delayed(Duration.zero).then((_) async {
+                setState(
+                  () {
+                    _autoLogin = true;
+                    _authData = snapshot.data as Map<String, dynamic>;
+                    _passwordController.value =
+                        TextEditingValue(text: _authData['password']);
+                  },
+                );
+                await _submit(validate: false);
+              });
+            }
+
+            return _authMode == AuthMode.forgotPass
+                ? ForgotPass(
+                    callback: ({AuthMode authMode = AuthMode.login}) {
+                      setState(() {
+                        _authMode = authMode;
+                      });
+                    },
+                  )
+                : Container(
+                    height: _authMode == AuthMode.signup
+                        ? 320
+                        : _showForgotPass
+                            ? 320
+                            : 260,
+                    constraints: BoxConstraints(
+                        minHeight: _authMode == AuthMode.signup
+                            ? 320
+                            : _showForgotPass
+                                ? 320
+                                : 260),
+                    width: deviceSize.width * 0.75,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            TextFormField(
+                              initialValue: _authData['email'],
+                              decoration:
+                                  const InputDecoration(labelText: 'E-Mail'),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value!.isEmpty || !value.contains('@')) {
+                                  return 'Invalid email!';
                                 }
-                              : null,
-                        ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      if (_isLoading)
-                        const CircularProgressIndicator()
-                      else
-                        ElevatedButton(
-                          child: Text(_authMode == AuthMode.login
-                              ? 'LOGIN'
-                              : 'SIGN UP'),
-                          onPressed: _submit,
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _authData['email'] = value!;
+                              },
+                            ),
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'Password'),
+                              obscureText: true,
+                              controller: _passwordController,
+                              validator: (value) {
+                                if (value!.isEmpty || value.length <= 5) {
+                                  return 'Password is too short!';
+                                }
+                              },
+                              onSaved: (value) {
+                                _authData['password'] = value!;
+                              },
+                            ),
+                            if (_authMode == AuthMode.signup)
+                              TextFormField(
+                                enabled: _authMode == AuthMode.signup,
+                                decoration: const InputDecoration(
+                                    labelText: 'Confirm Password'),
+                                obscureText: true,
+                                validator: _authMode == AuthMode.signup
+                                    ? (value) {
+                                        if (value != _passwordController.text) {
+                                          return 'Passwords do not match!';
+                                        }
+                                      }
+                                    : null,
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30.0, vertical: 8.0),
-                              primary: Theme.of(context).primaryColor,
-                              textStyle: TextStyle(
-                                color: Theme.of(context)
-                                    .primaryTextTheme
-                                    .button
-                                    ?.color,
-                              )),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            if (_isLoading)
+                              const CircularProgressIndicator()
+                            else
+                              ElevatedButton(
+                                child: Text(_authMode == AuthMode.login
+                                    ? 'LOGIN'
+                                    : 'SIGN UP'),
+                                onPressed: _submit,
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30.0, vertical: 8.0),
+                                    primary: Theme.of(context).primaryColor,
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .primaryTextTheme
+                                          .button
+                                          ?.color,
+                                    )),
+                              ),
+                            if (!_isLoading)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 30.0, vertical: 4),
+                                child: TextButton(
+                                  child: Text(
+                                      '${_authMode == AuthMode.login ? 'SIGNUP' : 'LOGIN'} INSTEAD',
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                      )),
+                                  onPressed: _switchAuthMode,
+                                ),
+                              ),
+                            if (_showForgotPass)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 30.0, vertical: 4),
+                                child: TextButton(
+                                  child: Text('Forgot Password? 🤭',
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                      )),
+                                  onPressed: () => setState(() {
+                                    _authMode = AuthMode.forgotPass;
+                                    _showForgotPass = false;
+                                  }),
+                                ),
+                              ),
+                          ],
                         ),
-                      if (!_isLoading)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30.0, vertical: 4),
-                          child: TextButton(
-                            child: Text(
-                                '${_authMode == AuthMode.login ? 'SIGNUP' : 'LOGIN'} INSTEAD',
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                )),
-                            onPressed: _switchAuthMode,
-                          ),
-                        ),
-                      if (_showForgotPass)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30.0, vertical: 4),
-                          child: TextButton(
-                            child: Text('Forgot Password? 🤭',
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                )),
-                            onPressed: () => setState(() {
-                              _authMode = AuthMode.forgotPass;
-                              _showForgotPass = false;
-                            }),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                      ),
+                    ),
+                  );
+          }),
     );
   }
 }
