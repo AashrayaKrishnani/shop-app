@@ -73,8 +73,11 @@ class _MyProductItemState extends State<MyProductItem> {
                           title: Text(widget.product.title),
                           subtitle: Text('\$${widget.product.price}'),
                           trailing: CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(widget.product.imageUrl),
+                            backgroundImage: FadeInImage(
+                              placeholder: const AssetImage(
+                                  'assets/images/product-placeholder.png'),
+                              image: NetworkImage(widget.product.imageUrl),
+                            ).image,
                           ),
                         ),
                         actions: [

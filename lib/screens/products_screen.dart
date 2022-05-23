@@ -57,9 +57,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final productsObject = Provider.of<Products>(context);
-    if (products.isEmpty) {
-      products = productsObject.products;
-    }
+
+    // Bug: Shows all products when favorites are to be shown but favorites are actually empty.
+    // if (products.isEmpty) {
+    //   products = productsObject.products;
+    // }
 
     // Checking if Authenticated.
     if (!Provider.of<Auth>(context).isIn) {
