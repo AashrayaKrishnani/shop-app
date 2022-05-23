@@ -18,7 +18,7 @@ class SweatSmileImage extends StatelessWidget {
               dimension: h,
               child: FittedBox(
                 child: Image.network(
-                    'https://www.pngitem.com/pimgs/m/106-1061780_emoji-transparent-download-smiling-with-sweat-emoji-covent.png'),
+                    'https://png.pngitem.com/pimgs/s/106-1061780_emoji-transparent-download-smiling-with-sweat-emoji-covent.png'),
               ),
             ),
           ),

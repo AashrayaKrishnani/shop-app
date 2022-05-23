@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/my_products_screen.dart';
 import 'package:shop_app/screens/products_screen.dart';
 
+import '../helpers/custom_route.dart';
 import '../models/auth.dart';
 import '../screens/orders_screen.dart';
 
@@ -83,11 +84,12 @@ class MainDrawer extends StatelessWidget {
                           .pushReplacementNamed(ProductsScreen.route)),
                   const Divider(),
                   buildListTile(
-                      context,
-                      Icons.delivery_dining,
-                      '❤ My Orders ❤',
-                      () => Navigator.of(context)
-                          .pushReplacementNamed(OrdersScreen.route)),
+                    context,
+                    Icons.delivery_dining,
+                    '❤ My Orders ❤',
+                    () => Navigator.of(context)
+                        .pushReplacementNamed(OrdersScreen.route),
+                  ),
                   const Divider(),
                   buildListTile(
                       context,

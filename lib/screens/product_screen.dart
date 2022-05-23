@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/models/products.dart';
@@ -20,55 +22,168 @@ class ProductScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(product.title),
-        actions: [
-          Consumer<Cart>(
-            builder: (ctx, cart, child) =>
-                Badge(child: child, value: cart.itemCount.toString()),
-            child: IconButton(
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(CartScreen.route),
-              icon: const Icon(Icons.shopping_cart),
-            ),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: Text(product.title),
+      //   actions: [
+      //     Consumer<Cart>(
+      //       builder: (ctx, cart, child) =>
+      //           Badge(child: child, value: cart.itemCount.toString()),
+      //       child: IconButton(
+      //         onPressed: () =>
+      //             Navigator.of(context).pushNamed(CartScreen.route),
+      //         icon: const Icon(Icons.shopping_cart),
+      //       ),
+      //     ),
+      //   ],
+      // ),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 300,
-                  child: Image.network(
-                    product.imageUrl,
-                    fit: BoxFit.contain,
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                actions: [
+                  Consumer<Cart>(
+                    builder: (ctx, cart, child) =>
+                        Badge(child: child, value: cart.itemCount.toString()),
+                    child: IconButton(
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed(CartScreen.route),
+                      icon: const Icon(Icons.shopping_cart),
+                    ),
+                  ),
+                ],
+                expandedHeight: 300,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Hero(
+                    tag: product.id,
+                    child: Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)),
+                      child: Container(
+                        width: 50,
+                        color: Colors.black87.withOpacity(.8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        child: Text(
+                          product.title,
+                          softWrap: true,
+                          maxLines: 1,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline6
+                              ?.copyWith(fontSize: 30, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5.0, vertical: 2),
+                            child: Chip(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                label: Padding(
+                                  padding: const EdgeInsets.all(3),
+                                  child: Text(
+                                    'Description',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline6
+                                        ?.copyWith(
+                                            color: Colors.white, fontSize: 18),
+                                  ),
+                                )),
+                          ),
+                          Chip(
+                            label: Text(
+                              '\$${product.price}',
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 20),
+                            ),
+                          ),
+                        ]),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(1),
+                      child: Container(
+                        color: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
+                        child: Text(
+                          product.description,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              ?.copyWith(fontSize: 20, color: Colors.white),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: 800,
+                    )
+                  ],
                 ),
-                Text(
-                  '\$${product.price}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 20),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  product.description,
-                  style: Theme.of(context).textTheme.bodyText1,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-              ],
-            ),
+              ),
+            ],
+            // child: Column(
+            //   crossAxisAlignment: CrossAxisAlignment.center,
+            //   children: [
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: 300,
+            //   child: Hero(
+            //     tag: product.id,
+            //     child: ClipRRect(
+            //       borderRadius: const BorderRadius.all(Radius.circular(20)),
+            //       child: Image.network(
+            //         product.imageUrl,
+            //         fit: BoxFit.contain,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(
+            //   height: 10,
+            // ),
+            // Text(
+            //   '\$${product.price}',
+            //   style: const TextStyle(color: Colors.grey, fontSize: 20),
+            // ),
+            // const SizedBox(
+            //   height: 10,
+            // ),
+            // Text(
+            //   product.description,
+            //   style: Theme.of(context).textTheme.bodyText1,
+            //   textAlign: TextAlign.center,
+            // ),
+            // const SizedBox(
+            //   height: 10,
+            // ),
+            //   ],
+            // ),
           ),
           Positioned(
             child: Container(

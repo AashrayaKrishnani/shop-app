@@ -101,7 +101,7 @@ class _ForgotPassState extends State<ForgotPass> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 160,
+      height: 200,
       constraints: const BoxConstraints(minHeight: 160),
       width: MediaQuery.of(context).size.width * 0.75,
       padding: const EdgeInsets.all(16.0),
@@ -143,6 +143,23 @@ class _ForgotPassState extends State<ForgotPass> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30.0, vertical: 8.0),
                       primary: Theme.of(context).primaryColor,
+                      textStyle: TextStyle(
+                        color: Theme.of(context).primaryTextTheme.button?.color,
+                      )),
+                ),
+              if (!_isLoading)
+                ElevatedButton(
+                  child: const Text('Go Back'),
+                  onPressed: () {
+                    widget.callback();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 8.0),
+                      primary: Theme.of(context).errorColor,
                       textStyle: TextStyle(
                         color: Theme.of(context).primaryTextTheme.button?.color,
                       )),

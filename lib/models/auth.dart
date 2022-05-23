@@ -18,6 +18,7 @@ class Auth with ChangeNotifier {
   static String? _token;
   LogOutReason _logOutReason = LogOutReason.none;
   Timer? _logInTimer;
+  bool triedCheckingPrefs = false;
 
   LogOutReason get logOutReason {
     final LogOutReason result = _logOutReason;
@@ -71,7 +72,8 @@ class Auth with ChangeNotifier {
       // Error Checking
       if (response.statusCode >= 400) {
         try {
-          throw HttpException(json.decode(response.body)['error']);
+          throw HttpException(
+              json.decode(response.body)['error']['message'] as String);
         } catch (_) {
           throw HttpException(response.body);
         }
@@ -117,7 +119,7 @@ class Auth with ChangeNotifier {
       // Error Checking
       if (response.statusCode >= 400) {
         try {
-          throw HttpException(json.decode(response.body)['error']);
+          throw HttpException(json.decode(response.body)['error']['message']);
         } catch (_) {
           throw HttpException(response.body);
         }
@@ -144,6 +146,9 @@ class Auth with ChangeNotifier {
   }
 
   Future<void> storePrefs() async {
+    triedCheckingPrefs = false;
+    print('Added prefs');
+
     final prefs = await SharedPreferences.getInstance();
     final data = json.encode({'email': _email, 'password': _password});
     await prefs.setString('userData', data);
@@ -152,10 +157,14 @@ class Auth with ChangeNotifier {
   Future<void> clearPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    print('Cleared Prefs');
+    triedCheckingPrefs = true;
   }
 
   Future<dynamic> getPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    print('Checked Prefs');
+    triedCheckingPrefs = true;
     if (prefs.containsKey('userData')) {
       final data = json.decode(prefs.getString('userData') as String);
       return data;

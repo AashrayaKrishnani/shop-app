@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 
-import '../helpers.dart';
+import '../helpers/helpers.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 
@@ -76,9 +76,13 @@ class ProductItem extends StatelessWidget {
                 value: product, child: const ProductScreen())),
           ),
         ),
-        child: Image.network(
-          product.imageUrl,
-          fit: BoxFit.contain,
+        child: Hero(
+          tag: product.id,
+          child: FadeInImage(
+            placeholder:
+                const AssetImage('assets/images/product-placeholder.png'),
+            image: NetworkImage(product.imageUrl),
+          ),
         ),
       ),
       footer: ClipRRect(
@@ -93,7 +97,7 @@ class ProductItem extends StatelessWidget {
                 Text(
                   product.title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 18),
                 ),
                 Text(
                   '\$ ' + formatAmt(product.price).toString(),

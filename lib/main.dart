@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop_app/models/auth.dart';
-import 'package:shop_app/models/cart.dart';
-import 'package:shop_app/screens/auth_screen.dart';
-import 'package:shop_app/screens/cart_screen.dart';
-import 'package:shop_app/screens/my_products_screen.dart';
-import 'package:shop_app/screens/orders_screen.dart';
-import 'package:shop_app/screens/product_form_screen.dart';
-import 'package:shop_app/screens/product_screen.dart';
-import 'package:shop_app/screens/products_screen.dart';
-import 'package:shop_app/widgets/loading_spinner.dart';
+import 'package:shop_app/helpers/custom_route.dart';
 
-import 'models/firebase.dart';
+import 'models/auth.dart';
+import 'models/cart.dart';
 import 'models/orders.dart';
 import 'models/products.dart';
+import 'screens/auth_screen.dart';
+import 'screens/cart_screen.dart';
+import 'screens/my_products_screen.dart';
+import 'screens/orders_screen.dart';
+import 'screens/product_form_screen.dart';
+import 'screens/product_screen.dart';
+import 'screens/products_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,6 +39,12 @@ class MyApp extends StatelessWidget {
                 secondary: Colors.amber,
                 tertiary: Colors.pinkAccent),
             fontFamily: 'Lato',
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CustomRouteTransitionBuilder(),
+                TargetPlatform.iOS: CustomRouteTransitionBuilder()
+              },
+            ),
           ),
           home: auth.isIn ? const ProductsScreen() : const AuthScreen(),
           routes: {

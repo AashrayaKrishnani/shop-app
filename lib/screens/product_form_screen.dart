@@ -123,7 +123,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       ),
       body: isUploading
           ? const LoadingSpinner(
-              message: 'Submitting Form! 📄',
+              message: 'Adding Product! 📄',
             )
           : Form(
               key: _form,
